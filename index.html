@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Global Chat</title>
+    <style>
+        body { font-family: Arial, sans-serif; text-align: center; }
+        #chat-box { height: 300px; overflow-y: scroll; border: 1px solid #ccc; padding: 10px; }
+        #message-input { width: 80%; padding: 10px; }
+        #send-button { padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Global Chat</h1>
+    <div id="chat-box"></div>
+    <input type="text" id="message-input" placeholder="Type a message...">
+    <button id="send-button">Send</button>
+
+    <script>
+        async function fetchMessages() {
+            const response = await fetch("http://localhost:3000/messages");
+            const messages = await response.json();
+            const chatBox = document.getElementById("chat-box");
+            chatBox.innerHTML = messages.map(msg => `<div>${msg.text}</div>`).join("");
+        }
+
+        document.getElementById("send-button").addEventListener("click", async () => {
+            const messageInput = document.getElementById("message-input");
+            if (messageInput.value.trim() === "") return;
+
+            await fetch("http://localhost:3000/messages", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ text: messageInput.value }),
+            });
+
+            messageInput.value = "";
+            fetchMessages();
+        });
+
+        setInterval(fetchMessages, 5000); // Refresh messages every 5 seconds
+    </script>
+</body>
+</html>
